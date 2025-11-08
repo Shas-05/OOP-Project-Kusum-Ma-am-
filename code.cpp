@@ -1,95 +1,112 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-// Abstract Class: Medicine
-class Medicine{
+// ---------------- Abstract Class: Medicine ----------------
+// This class serves as a blueprint for all medicines.
+// It contains common attributes like name, quantity, and price.
+class Medicine {
 protected:
     string name;
     int quantity;
     double price;
 
-public: 
-    Medicine(string n , int q , double p):name(n) , quantity(q),price(p){}
+public:
+    // Constructor to initialize medicine details
+    Medicine(string n, int q, double p) : name(n), quantity(q), price(p) {}
 
-virtual void showDetails() = 0; // Polymorphism
+    // Pure virtual function (abstract function)
+    virtual void showDetails() = 0; // Enables runtime polymorphism
 
-    string getName(){return name;}
-    int getQuantity(){return quantity;}
-    double getPrice(){return price;}
+    // Getter functions
+    string getName() { return name; }
+    int getQuantity() { return quantity; }
+    double getPrice() { return price; }
 
-    void updateQuantity(int q){
+    // Update quantity
+    void updateQuantity(int q) {
         quantity = q;
     }
 
-    bool reduceStock(int q){
-        if(q<=quantity){
+    // Reduce stock after purchase
+    bool reduceStock(int q) {
+        if (q <= quantity) {
             quantity -= q;
             return true;
         }
-        return false;
+        return false; // If not enough stock
     }
 
-    virtual ~Medicine(){}
+    // Virtual destructor for safe cleanup
+    virtual ~Medicine() {}
 };
 
-//Derived class
-class Antibiotic : public Medicine{
+// ---------------- Derived Class: Antibiotic ----------------
+class Antibiotic : public Medicine {
 public:
-    Antibiotic(string n , int q , double p):Medicine(n,q,p){}
+    // Constructor using base class initializer list
+    Antibiotic(string n, int q, double p) : Medicine(n, q, p) {}
 
-    void showDetails() override{
-        cout<<"[Antibiotic] "<<name
-        << "| Stock: "<<quantity
-        << "| Price: $"<<price<<endl;
+    // Display details of antibiotic
+    void showDetails() override {
+        cout << "[Antibiotic] " << name
+             << " | Stock: " << quantity
+             << " | Price: $" << price << endl;
     }
 };
 
-class Painkiller : public Medicine
-{
+// ---------------- Derived Class: Painkiller ----------------
+class Painkiller : public Medicine {
 public:
     Painkiller(string n, int q, double p) : Medicine(n, q, p) {}
 
-    void showDetails() override{
+    // Display details of painkiller
+    void showDetails() override {
         cout << "[Painkiller] " << name
-        << " | Stock: " << quantity
-        << " | Price: $" << price << endl;
+             << " | Stock: " << quantity
+             << " | Price: $" << price << endl;
     }
 };
 
-//Billing class
-class Bill{
-    double totalAmount =0;
+// ---------------- Class: Bill ----------------
+// Responsible for calculating and displaying total bill
+class Bill {
+    double totalAmount = 0;
 public:
-    void additem(double price,int qty){
-        totalAmount += (price*qty);
+    // Add item to bill
+    void additem(double price, int qty) {
+        totalAmount += (price * qty);
     }
 
-    void generate(){
+    // Generate final bill
+    void generate() {
         cout << "\n------ BILL ------" << endl;
         cout << "Total Payable: $" << fixed << setprecision(2) << totalAmount << endl;
         cout << "------------------" << endl;
     }
 };
 
-
-//Pharmacy class
-class Pharmacy{
-    vector<Medicine*> items;
+// ---------------- Class: Pharmacy ----------------
+// Manages list of medicines, adding, showing, and purchasing
+class Pharmacy {
+    vector<Medicine*> items; // Stores all medicines (using base class pointer)
 
 public:
-    void addMedicine(Medicine* m){
+    // Add a new medicine to inventory
+    void addMedicine(Medicine* m) {
         items.push_back(m);
-        cout<< "Medicine added successfully!\n";
+        cout << "Medicine added successfully!\n";
     }
 
-    void showAll(){
-        cout<<"\n---- Medicine List ---"<<endl;
-        for(auto m : items){
+    // Display all medicines in stock
+    void showAll() {
+        cout << "\n---- Medicine List ----" << endl;
+        for (auto m : items) {
             m->showDetails();
         }
     }
 
-    void purchaseMedicine(){
+    // Purchase medicine by name
+    void purchaseMedicine() {
         string med;
         int qty;
         Bill bill;
@@ -99,13 +116,14 @@ public:
         cout << "Enter quantity: ";
         cin >> qty;
 
-        for (auto m : items){
-            if (m->getName() == med){
-                if (m->reduceStock(qty)){
+        // Search for medicine in list
+        for (auto m : items) {
+            if (m->getName() == med) {
+                // Check if enough stock is available
+                if (m->reduceStock(qty)) {
                     bill.additem(m->getPrice(), qty);
                     cout << "Purchase successful!" << endl;
-                }
-                else{
+                } else {
                     cout << "Insufficient stock!" << endl;
                 }
                 bill.generate();
@@ -116,11 +134,12 @@ public:
     }
 };
 
-int main(){
-    Pharmacy ph;
+// ---------------- Main Function ----------------
+int main() {
+    Pharmacy ph; // Pharmacy object
     int choice;
 
-    do{
+    do {
         cout << "\n===== Pharmacy Management System =====" << endl;
         cout << "1. Add Medicine" << endl;
         cout << "2. Show All Medicines" << endl;
@@ -129,8 +148,9 @@ int main(){
         cout << "Enter your choice: ";
         cin >> choice;
 
-        if(choice == 1){
-            int type,qty;
+        if (choice == 1) {
+            // Add a new medicine
+            int type, qty;
             double price;
             string name;
 
@@ -143,26 +163,26 @@ int main(){
             cout << "Enter Price: ";
             cin >> price;
 
-            if(type == 1){
-                ph.addMedicine(new Antibiotic(name,qty,price));
-            }
-            else{
-                ph.addMedicine(new Painkiller(name,qty,price));
+            // Create medicine object dynamically based on type
+            if (type == 1) {
+                ph.addMedicine(new Antibiotic(name, qty, price));
+            } else {
+                ph.addMedicine(new Painkiller(name, qty, price));
             }
         }
 
-        else if(choice == 2){
+        else if (choice == 2) {
+            // Show all medicines
             ph.showAll();
         }
 
-        else if(choice == 3){
+        else if (choice == 3) {
+            // Purchase a medicine
             ph.purchaseMedicine();
         }
-    }
-    while(choice != 4);
 
-    cout<<"Thank You!"<<endl;
+    } while (choice != 4); // Continue until user chooses to exit
+
+    cout << "Thank You!" << endl;
     return 0;
 }
-
-
